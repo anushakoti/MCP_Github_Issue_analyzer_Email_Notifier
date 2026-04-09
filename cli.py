@@ -1,3 +1,15 @@
+"""
+GitHub Issue Analyzer & Email Notifier — Interactive CLI.
+
+Usage:
+    python cli.py
+
+Example prompts:
+    Analyze open issues in anushakoti/RAG_HealthCare and email me a summary
+    What are the top issues in octocat/Hello-World?
+    Analyze facebook/react and send a report to my email
+"""
+
 import asyncio
 from dotenv import load_dotenv
 
@@ -9,25 +21,53 @@ from graph.graph_builder import build_graph
 
 async def main():
     graph = build_graph()
-    messages = []
-    print("Github issue analyzer and email notifier CLI (type 'quit' to exit)\n")
+
+    print("=" * 60)
+    print("  🔍 GitHub Issue Analyzer & Email Notifier")
+    print("=" * 60)
+    print("  Powered by: LangGraph + AWS Bedrock + MCP")
+    print("  Type 'quit' or 'exit' to stop.\n")
+    print("  Example: 'Analyze issues in owner/repo and email me'")
+    print("=" * 60 + "\n")
 
     while True:
-        user_input = input("You: ").strip()
-        if not user_input or user_input.lower() in ("quit", "exit"):
+        try:
+            user_input = input("You: ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\nExiting...")
+            break
+
+        if not user_input:
+            continue
+
+        if user_input.lower() in ("quit", "exit"):
+            print("Goodbye! 👋")
             break
 
         initial_state = {
-            "messages":      [HumanMessage(content=user_input)],
+            "messages": [HumanMessage(content=user_input)],
             "issues_report": "",
-            "next_agent":    "",
-            "email_sent":    False,
+            "next_agent": "",
+            "email_sent": False,
         }
 
-        result = await graph.ainvoke(initial_state)
-        messages = result["messages"]
+        print("\n⏳ Analyzing repository issues...\n")
 
-        print(f"\nAgent: {messages[-1].content}\n")
+        try:
+            result = await graph.ainvoke(initial_state)
+        except Exception as e:
+            print(f"\n❌ Error: {e}\n")
+            continue
+
+        messages = result["messages"]
+        final_response = messages[-1].content
+
+        print(f"Agent:\n{final_response}\n")
+
+        if result.get("email_sent"):
+            print("📧 Email notification dispatched successfully.\n")
+
+        print("-" * 60 + "\n")
 
 
 if __name__ == "__main__":
