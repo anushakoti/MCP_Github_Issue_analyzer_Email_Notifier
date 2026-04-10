@@ -206,9 +206,3 @@ MCP (Model Context Protocol) provides a standardized way for LLMs to interact wi
 
 **Why ReAct agents?**
 Each agent uses a Reason-Act loop, letting the LLM decide which tools to call and in what order — e.g., the GitHub agent may call `list_issues` then `get_issue` for each result without hardcoded orchestration.
-
----
-
-## License
-
-MIT
